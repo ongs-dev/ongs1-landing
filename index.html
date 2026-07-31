@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+
+<title>오늘공수 - 공수달력, 공수계산기</title>
+<meta name="description" content="광고없이 공수 입력 1초면 끝. 공수, 총액, 세후 금액까지 열자마자 현황이 한눈에. 건설 현장 일용직을 위한 공수·일당 기록 앱.">
+
+<link rel="canonical" href="https://www.ongs1.co.kr/">
+<meta property="og:type"        content="website">
+<meta property="og:url"         content="https://www.ongs1.co.kr/">
+<meta property="og:site_name"   content="오늘공수">
+<meta property="og:title"       content="오늘공수 - 공수달력, 공수계산기">
+<meta property="og:description" content="광고없이 공수 입력, 1초면 끝! 공수·총액·세후 금액까지 열자마자 한눈에.">
+<meta property="og:image"       content="https://www.ongs1.co.kr/assets/og.png">
+<meta property="og:image:width"  content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+<link rel="preload" href="assets/pretendard-subset.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+
+<style>
+/* 이 페이지에 쓰이는 글자만 담은 프리텐다드 (56KB, 사이트에 같이 올라감).
+   외부 CDN이 죽어도 글자가 안 깨진다. 서브셋에 없는 글자만 CDN·시스템 폰트로 넘어간다. */
+@font-face{
+  font-family:'PretendardSub';
+  src:url('assets/pretendard-subset.woff2') format('woff2-variations'),
+      url('assets/pretendard-subset.woff2') format('woff2');
+  font-weight:45 930;
+  font-style:normal;
+  font-display:block;
+}
+</style>
+
+<style>
+/* =====================================================================
+   피그마 701:29269 기준 — 프레임 390 x 647, 검정, 세로 간격 30
+   ===================================================================== */
+:root{
+  --purple:#945CFD;
+  --orange:#F75D21;
+  --pink:#FF8FA3;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000}
+body{
+  font-family:'PretendardSub','Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,
+              'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif;
+  color:#fff;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  min-height:100svh;display:flex;justify-content:center;
+}
+/* 만일의 경우 웹폰트가 전부 실패하면 자간을 0으로 되돌려 글자 겹침을 막는다 */
+html.no-webfont .ls{letter-spacing:normal}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none;-webkit-tap-highlight-color:transparent}
+
+.frame{
+  width:100%;max-width:390px;
+  padding:calc(20px + env(safe-area-inset-top)) 10px calc(20px + env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:30px;
+}
+
+/* ---------- 로고 ---------- */
+.logo{height:20px;width:auto}
+
+/* ---------- 카피 ---------- */
+.copy{text-align:center;display:flex;flex-direction:column;align-items:center}
+.copy .l1{
+  display:block;font-size:24px;font-weight:400;color:#fff;
+  letter-spacing:-.6px;line-height:34px;
+}
+.copy .l2{
+  display:block;font-size:32px;font-weight:600;color:var(--purple);
+  letter-spacing:-.8px;line-height:44.8px;
+}
+.copy .sub span{
+  display:block;font-size:14px;font-weight:400;color:rgba(255,255,255,.6);
+  letter-spacing:-.35px;line-height:22px;
+}
+
+/* ---------- 다운로드 버튼 ---------- */
+.stores{display:flex;gap:10px;align-items:center;width:100%;justify-content:center}
+.store{
+  width:160px;max-width:calc(50% - 5px);
+  padding:5px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  overflow:hidden;border:1px solid transparent;
+  transition:transform .14s ease, opacity .14s ease;
+}
+.store:active{transform:scale(.97)}
+.store:focus-visible{outline:2px solid var(--purple);outline-offset:3px}
+.store .ico{flex:none;display:block}
+.store .tx{text-align:left;white-space:nowrap;letter-spacing:-.3px}
+.store .tx small{display:block;font-size:12px;font-weight:400;line-height:1.1}
+.store .tx strong{display:block;font-size:15px;font-weight:700;line-height:1.1}
+
+.store--ios{background:#fff;color:#000}
+.store--ios .tx small{color:rgba(0,0,0,.6)}
+.store--aos{background:#000;border-color:rgba(255,255,255,.6);color:#fff}
+.store--aos .tx small{color:rgba(255,255,255,.6)}
+
+/* ---------- 폰 이미지 ---------- */
+.phone{
+  width:266px;max-width:74vw;aspect-ratio:266/335.31;
+  overflow:hidden;flex:none;
+}
+.phone img{width:100%;height:100%;object-fit:contain}
+
+/* ---------- 푸터 ---------- */
+.foot{
+  display:flex;gap:6px 16px;flex-wrap:wrap;justify-content:center;
+  font-size:11.5px;letter-spacing:-.29px;color:rgba(255,255,255,.32);line-height:1.5;
+}
+.foot a:hover{color:rgba(255,255,255,.7)}
+
+/* ---------- 자동 이동 안내 ---------- */
+.gate{
+  position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.95);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;text-align:center;padding:32px;
+}
+.gate.on{display:flex}
+.gate p{font-size:14px;letter-spacing:-.35px;color:rgba(255,255,255,.72)}
+.gate button{
+  font:inherit;font-size:13px;font-weight:500;letter-spacing:-.33px;
+  color:rgba(255,255,255,.5);background:none;border:none;
+  text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px;
+}
+.gate .dots i{
+  display:inline-block;width:7px;height:7px;border-radius:99px;margin:0 3px;
+  background:var(--orange);animation:blink 1.1s infinite;
+}
+.gate .dots i:nth-child(2){background:var(--pink);animation-delay:.16s}
+.gate .dots i:nth-child(3){background:var(--purple);animation-delay:.32s}
+@keyframes blink{0%,60%,100%{opacity:.25}30%{opacity:1}}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="frame">
+
+  <img class="logo" src="assets/logo-wordmark.png" alt="오늘공수" width="618" height="149">
+
+  <div class="copy">
+    <h1 class="ls"><span class="l1">광고없이 공수 입력</span><span class="l2">1초면 끝!</span></h1>
+    <p class="sub ls"><span>공수, 총액, 세후 금액까지</span><span>열자마자 현황이 한눈에</span></p>
+  </div>
+
+  <div class="stores">
+    <a class="store store--ios ls" id="btn-ios" href="#" data-store="ios" rel="noopener">
+      <svg class="ico" width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 12.54c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.48.83-.72 0-1.83-.81-3-.79-1.55.02-2.97.9-3.77 2.28-1.6 2.79-.41 6.92 1.15 9.18.76 1.11 1.67 2.35 2.86 2.31 1.15-.05 1.58-.74 2.97-.74 1.38 0 1.78.74 3 .72 1.24-.02 2.02-1.13 2.78-2.24.88-1.29 1.24-2.54 1.26-2.6-.03-.01-2.41-.93-2.43-3.69M14.8 5.79c.63-.77 1.06-1.83.94-2.9-.91.04-2.02.61-2.67 1.37-.58.68-1.09 1.77-.96 2.81 1.02.08 2.06-.52 2.69-1.28"/></svg>
+      <span class="tx"><small>App Store</small><strong>아이폰 다운로드</strong></span>
+    </a>
+    <a class="store store--aos ls" id="btn-aos" href="#" data-store="android" rel="noopener">
+      <svg class="ico" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.61 1.81a1 1 0 0 0-.42.83v18.72a1 1 0 0 0 .42.83l.1.06 10.48-10.48v-.06L3.71 1.75zM17.6 15.4l-3.4-3.4v-.06l3.4-3.4.08.05 4.15 2.36c1.18.67 1.18 1.77 0 2.44l-4.15 2.36zM16.51 16.6L13.03 13.1 2.5 23.63c.39.41 1.03.46 1.75.05zM16.51 7.4 4.25.32C3.53-.09 2.89-.04 2.5.37L13.03 10.9z"/></svg>
+      <span class="tx"><small>Google Play</small><strong>안드로이드 다운로드</strong></span>
+    </a>
+  </div>
+
+  <!-- 폰 이미지 — 피그마 701:29305 (iPhone 15) 내보낸 파일 -->
+  <div class="phone">
+    <img src="assets/phone.png" alt="오늘공수 공수달력 화면" width="798" height="1006" fetchpriority="high">
+  </div>
+
+  <div class="foot">
+    <span>© 2026 오늘공수</span>
+    <a id="lnk-privacy" href="#">개인정보처리방침</a>
+    <a id="lnk-contact" href="#">문의</a>
+  </div>
+
+</div>
+
+<div class="gate" id="gate" role="status" aria-live="polite">
+  <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+  <p id="gate-msg">스토어로 이동 중입니다…</p>
+  <button type="button" id="gate-cancel">이동하지 않고 페이지 보기</button>
+</div>
+
+<script>
+/* =====================================================================
+   여기 값만 바꾸면 됩니다
+   ===================================================================== */
+var CONFIG = {
+  IOS_URL : 'https://apps.apple.com/kr/app/id6783352967',
+  AOS_URL : 'https://play.google.com/store/apps/details?id=com.ongs.app',
+
+  PRIVACY_URL : '',            /* 개인정보처리방침 주소 — 비우면 링크 자동 숨김 */
+  CONTACT_MAIL: '',            /* 문의 이메일 — 비우면 링크 자동 숨김 */
+
+  GA_ID : '',                  /* 구글 애널리틱스 측정 ID (G-로 시작) */
+
+  AUTO_REDIRECT : false,       /* true = 접속 즉시 스토어로 이동. ?go=1 링크는 항상 이동 */
+  AUTO_DELAY_MS : 900,
+
+  EMPHASIZE_BY_OS : false      /* true = 안드로이드 접속자에게 안드 버튼을 앞으로 */
+};
+
+/* =====================================================================
+   아래는 수정 불필요
+   ===================================================================== */
+(function () {
+  'use strict';
+
+  /* ---------- 폰트 방어 : 실제 렌더 폭을 재서 판별 ---------- */
+  (function guardFont(){
+    function widthOf(family){
+      var s = document.createElement('span');
+      s.style.cssText = 'position:absolute;left:-9999px;top:-9999px;white-space:nowrap;'
+                      + 'font-size:100px;font-weight:700;letter-spacing:normal;font-family:' + family;
+      s.textContent = '광고없이공수입력1초면끝';
+      document.body.appendChild(s);
+      var w = s.offsetWidth;
+      s.parentNode.removeChild(s);
+      return w;
+    }
+    function verify(){
+      var base = widthOf('monospace');
+      var real = widthOf('"PretendardSub","Pretendard Variable",Pretendard,monospace');
+      if (real === base) document.documentElement.classList.add('no-webfont');
+    }
+    if (document.fonts && document.fonts.ready) {
+      var t = setTimeout(verify, 2500);
+      document.fonts.ready.then(function(){ clearTimeout(t); verify(); });
+    } else {
+      window.addEventListener('load', verify);
+    }
+  })();
+
+  var qs = new URLSearchParams(location.search);
+
+  /* ---------- 기기 판별 ---------- */
+  function detectOS() {
+    var ua = navigator.userAgent || '';
+    if (/android/i.test(ua)) return 'android';
+    if (/iPad|iPhone|iPod/.test(ua)) return 'ios';
+    if (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return 'ios';
+    return 'other';
+  }
+  var os = detectOS();
+
+  /* ---------- 유입 경로 : ?from=insta 처럼 붙이면 채널이 나뉨 ---------- */
+  var source = qs.get('from') || qs.get('utm_source') || 'direct';
+
+  /* ---------- 구글 애널리틱스 ---------- */
+  var gaReady = false;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ window.dataLayer.push(arguments); }
+
+  if (CONFIG.GA_ID) {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + CONFIG.GA_ID;
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', CONFIG.GA_ID, { send_page_view: true });
+    gaReady = true;
+  }
+
+  function track(name, params, done) {
+    var payload = Object.assign({ detected_os: os, source: source }, params || {});
+    if (!gaReady) { console.log('[track]', name, payload); if (done) done(); return; }
+    var fired = false;
+    function go(){ if (!fired) { fired = true; if (done) done(); } }
+    payload.event_callback = go;
+    payload.transport_type = 'beacon';
+    gtag('event', name, payload);
+    setTimeout(go, 450);
+  }
+
+  track('landing_view');
+
+  /* ---------- 버튼 ---------- */
+  var btnIOS = document.getElementById('btn-ios');
+  var btnAOS = document.getElementById('btn-aos');
+  btnIOS.href = CONFIG.IOS_URL;
+  btnAOS.href = CONFIG.AOS_URL;
+
+  if (CONFIG.EMPHASIZE_BY_OS && os === 'android') {
+    btnAOS.parentNode.insertBefore(btnAOS, btnIOS);
+  }
+
+  function storeURL(w){ return w === 'android' ? CONFIG.AOS_URL : CONFIG.IOS_URL; }
+
+  [btnIOS, btnAOS].forEach(function (el) {
+    el.addEventListener('click', function (e) {
+      var which = el.dataset.store;
+      e.preventDefault();
+      track('store_click', { store: which, auto: false }, function () {
+        location.href = storeURL(which);
+      });
+    });
+  });
+
+  /* ---------- 자동 이동 ---------- */
+  var forced = qs.get('go') === '1';
+  var stopped = false;
+
+  if ((CONFIG.AUTO_REDIRECT || forced) && (os === 'ios' || os === 'android')) {
+    var gate = document.getElementById('gate');
+    gate.classList.add('on');
+    document.getElementById('gate-cancel').addEventListener('click', function () {
+      stopped = true; gate.classList.remove('on');
+    });
+    setTimeout(function () {
+      if (stopped) return;
+      track('store_click', { store: os, auto: true }, function () {
+        if (!stopped) location.href = storeURL(os);
+      });
+    }, CONFIG.AUTO_DELAY_MS);
+    setTimeout(function () {
+      if (stopped) return;
+      gate.classList.remove('on');
+    }, CONFIG.AUTO_DELAY_MS + 3500);
+  }
+
+  /* ---------- 푸터 링크 ---------- */
+  var pv = document.getElementById('lnk-privacy');
+  var ct = document.getElementById('lnk-contact');
+  if (CONFIG.PRIVACY_URL) { pv.href = CONFIG.PRIVACY_URL; pv.target = '_blank'; pv.rel = 'noopener'; }
+  else { pv.style.display = 'none'; }
+  if (CONFIG.CONTACT_MAIL) { ct.href = 'mailto:' + CONFIG.CONTACT_MAIL; }
+  else { ct.style.display = 'none'; }
+})();
+</script>
+</body>
+</html>
