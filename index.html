@@ -201,8 +201,8 @@ var CONFIG = {
 
   GA_ID : 'G-RWEYC4B4NX',      /* 구글 애널리틱스 측정 ID (G-로 시작) */
 
-  AUTO_REDIRECT : false,       /* true = 접속 즉시 스토어로 이동. ?go=1 링크는 항상 이동 */
-  AUTO_DELAY_MS : 900,
+  AUTO_REDIRECT : true,        /* true = 접속 즉시 기기에 맞는 스토어로 이동. ?stay=1 링크는 페이지만 보여줌 */
+  AUTO_DELAY_MS : 600,
 
   EMPHASIZE_BY_OS : false      /* true = 안드로이드 접속자에게 안드 버튼을 앞으로 */
 };
@@ -304,17 +304,32 @@ var CONFIG = {
   });
 
   /* ---------- 자동 이동 ---------- */
-  var forced = qs.get('go') === '1';
+  var forced  = qs.get('go') === '1';
+  var stay    = qs.get('stay') === '1';   /* ?stay=1 → 자동 이동 없이 페이지만 보여줌 */
   var stopped = false;
 
-  if ((CONFIG.AUTO_REDIRECT || forced) && (os === 'ios' || os === 'android')) {
+  /* 스토어로 보낸 뒤 뒤로가기로 돌아왔을 때 다시 튕기지 않도록 표시해 둔다.
+     이 표시가 없으면 뒤로가기 → 자동이동 → 뒤로가기 무한 반복이 된다. */
+  var SENT = 'ongs_sent';
+  function markSent(){ try { sessionStorage.setItem(SENT, '1'); } catch (e) {} }
+  function alreadySent(){ try { return sessionStorage.getItem(SENT) === '1'; } catch (e) { return false; } }
+
+  var shouldGo = (CONFIG.AUTO_REDIRECT || forced)
+              && !stay
+              && !alreadySent()
+              && (os === 'ios' || os === 'android');
+
+  if (shouldGo) {
     var gate = document.getElementById('gate');
     gate.classList.add('on');
     document.getElementById('gate-cancel').addEventListener('click', function () {
-      stopped = true; gate.classList.remove('on');
+      stopped = true;
+      markSent();
+      gate.classList.remove('on');
     });
     setTimeout(function () {
       if (stopped) return;
+      markSent();
       track('store_click', { store: os, auto: true }, function () {
         if (!stopped) location.href = storeURL(os);
       });
@@ -324,6 +339,14 @@ var CONFIG = {
       gate.classList.remove('on');
     }, CONFIG.AUTO_DELAY_MS + 3500);
   }
+
+  /* 뒤로가기로 돌아왔을 때(브라우저 캐시 복원) 안내 화면이 남아있지 않게 정리 */
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+      var g = document.getElementById('gate');
+      if (g) g.classList.remove('on');
+    }
+  });
 
   /* ---------- 푸터 링크 ---------- */
   var pv = document.getElementById('lnk-privacy');
